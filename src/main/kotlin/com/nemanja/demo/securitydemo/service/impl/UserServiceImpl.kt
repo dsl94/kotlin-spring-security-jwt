@@ -17,24 +17,30 @@ import org.springframework.stereotype.Service
 @Service
 class UserServiceImpl : UserService {
 
-	@Autowired
-	private lateinit var userRepo: UserRepository
+    @Autowired
+    private lateinit var userRepo: UserRepository
 
-	override fun register(request: RegisterUserRequestDTO): RegisterUserResponseDTO {
+    override fun register(request: RegisterUserRequestDTO): RegisterUserResponseDTO {
 
-		val encoder = BCryptPasswordEncoder()
+        val encoder = BCryptPasswordEncoder()
 
-		var forSave  = User()
-		forSave.username = request.username
-		forSave.email = request.email
-		forSave.password = encoder.encode(request.password)
-		forSave.fullName = request.fullName
+        val forSave = User()
+        forSave.username = request.username
+        forSave.email = request.email
+        forSave.password = encoder.encode(request.password)
+        forSave.fullName = request.fullName
 
-		userRepo.findByEmailIgnoreCase(forSave.email!!) ?: throw UserException(ErrorCode.EMAIL_EXIST, "Email exist")
-		userRepo.findByUsernameIgnoreCase(forSave.username!!) ?: throw UserException(ErrorCode.USERNAME_EXIST, "Username exist")
 
-		val result = userRepo.save(forSave)
+        if (userRepo.findByEmailIgnoreCase(forSave.email!!) != null) {
+            throw UserException(ErrorCode.EMAIL_EXIST, "Email exist")
+        }
 
-		return RegisterUserResponseDTO(result.id!!, result.username!!, result.fullName!!, result.email!!)
-	}
+        if (userRepo.findByUsernameIgnoreCase(forSave.username!!) != null) {
+            throw UserException(ErrorCode.USERNAME_EXIST, "Username exist")
+        }
+
+        val result = userRepo.save(forSave)
+
+        return RegisterUserResponseDTO(result.id!!, result.username!!, result.fullName!!, result.email!!)
+    }
 }

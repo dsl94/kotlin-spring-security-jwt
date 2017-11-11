@@ -19,8 +19,8 @@ class MyUserDetailsService : UserDetailsService {
 
 	@Throws(UsernameNotFoundException::class)
 	override fun loadUserByUsername(username: String): UserDetails {
-		val user = userRepository.findByUsernameIgnoreCase(username) ?: UsernameNotFoundException(username)
+		val user = userRepository.findByUsernameIgnoreCase(username) ?: throw UsernameNotFoundException(username)
 
-		return MyUserPrinciple(user as User)
+		return MyUserPrinciple(user)
 	}
 }
